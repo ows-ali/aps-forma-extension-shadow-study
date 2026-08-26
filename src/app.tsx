@@ -7,7 +7,9 @@ import TimeSelector from "./components/TimeSelector";
 import PreviewButton from "./components/PreviewButton";
 import GeometryColorSelector from "./components/GeometryColorSelector";
 import { useTranslation } from "./i18n/useTranslation";
+import { Forma } from "forma-embedded-view-sdk/auto";
 
+console.log("loggin", await Forma.designTool.getPolygon())
 export default function App() {
   const { t } = useTranslation();
   const [month, setMonth] = useState(6);
@@ -18,10 +20,13 @@ export default function App() {
   const [endHour, setEndHour] = useState(20);
   const [endMinute, setEndMinute] = useState(0);
   const [resolution, setResolution] = useState("2048x1536");
-
   return (
     <>
-      <h1>{t("header.title")}</h1>
+      <h1>FortyGuard Hackathon</h1>
+      <h2>Team Berlin: Owais </h2>
+      <h2>Team Berlin: Vidya </h2>
+      <input type="text" placeholder="Enter your query" />
+      {/* <h1>{t("header.title")}</h1>
       <DateSelector month={month} setMonth={setMonth} day={day} setDay={setDay} />
       <TimeSelector
         startHour={startHour}
@@ -54,7 +59,7 @@ export default function App() {
         endMinute={endMinute}
         resolution={resolution}
         interval={interval}
-      />
+      /> */}
     </>
   );
 }
