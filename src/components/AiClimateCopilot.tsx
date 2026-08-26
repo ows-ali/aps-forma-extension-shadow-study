@@ -1,6 +1,12 @@
 import { useState } from "preact/hooks";
-import { FortyGuardEnvParamsResult, FortyGuardHeatmapResult } from "../services/types";
-import { fahrenheitToCelsius } from "../services/mockData";
+import {
+  FortyGuardEnvParamsResult,
+  FortyGuardHeatmapResult,
+} from "../services/types";
+import {
+  runThermalAgent,
+  ThermalAgentResult,
+} from "../agent/thermalAgent";
 
 interface AiClimateCopilotProps {
   heatmap: FortyGuardHeatmapResult;
@@ -14,136 +20,186 @@ interface ChatMessage {
   timestamp: string;
 }
 
-export default function AiClimateCopilot({ heatmap, envParams }: AiClimateCopilotProps) {
-  const rawMean = heatmap.stats_data.mean ?? 85;
-  const isRawFahrenheit = heatmap.stats_data.units !== "celsius";
-  const meanTempC = isRawFahrenheit ? fahrenheitToCelsius(rawMean) : rawMean;
-  const wetBulbC = envParams.wet_bulb_temperature_celsius ?? 24.5;
-  const solarIrr = envParams.solar_irradiance ?? 850;
-  const aqi = envParams["air_quality:idx"] ?? 42;
+function formatAgentResult(result: ThermalAgentResult): string {
+  const findings = result.findings
+    .map(
+      (finding) =>
+        `• ${finding.metric}: ${finding.value} — ${finding.interpretation}`,
+    )
+    .join("\n");
 
+  const recommendations = result.recommendations
+    .map(
+      (recommendation, index) =>
+        `${index + 1}. ${recommendation.recommendation}\n   Reason: ${recommendation.reason}`,
+    )
+    .join("\n");
+
+  return `${result.summary}
+
+Risk level: ${result.riskLevel.toUpperCase()}
+
+Baseline:
+• Mean temperature: ${result.baseline.meanTemperatureC}°C
+• Maximum temperature: ${result.baseline.maxTemperatureC}°C
+• Minimum temperature: ${result.baseline.minTemperatureC}°C
+• Heat exposure score: ${result.baseline.heatExposureScore}/100
+
+FortyGuard findings:
+${findings}
+
+Recommended design actions:
+${recommendations}`;
+}
+
+export default function AiClimateCopilot({
+  heatmap,
+  envParams,
+}: AiClimateCopilotProps) {
   const [inputQuery, setInputQuery] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "msg_1",
       sender: "ai",
-      text: `Hello! I am your AI Climate Copilot. I'm connected to your active Forma design scene and FortyGuard thermal metrics (Site Mean: ${meanTempC}°C, Wet-Bulb: ${wetBulbC}°C, Solar: ${solarIrr} W/m²). How can I help optimize your urban resilience?`,
+      text:
+        "I am your Residential Heat Design Agent. I can analyse the current FortyGuard thermal data and identify design changes that may reduce heat exposure.",
       timestamp: "Just now",
     },
   ]);
 
   const quickPrompts = [
-    "🌴 Suggest 3 cooling interventions for this site",
-    "☀️ How does solar irradiance impact south facades?",
-    "💧 Evaluate wet-bulb worker safety limits",
-    "🏢 Recommend optimal building massing for heat reduction",
+    "Analyse the current heat exposure",
+    "What design changes should we consider?",
+    "Which intervention should we prioritise?",
   ];
 
-  const generateAiResponse = (query: string): string => {
-    const q = query.toLowerCase();
-
-    if (q.includes("cooling") || q.includes("intervention") || q.includes("reduce heat")) {
-      return `Based on FortyGuard's current thermal scan (${meanTempC}°C ambient, ${solarIrr} W/m² solar load), here are 3 high-impact interventions:
-1. **Targeted Tree Canopy Buffer**: Planting high-transpiration deciduous trees along western & southern exposures can reduce ambient surface heat by 3.2°C to 5.5°C.
-2. **High-Albedo Cool Roofs**: Specifying roofing membranes with Solar Reflectance Index (SRI) > 82 will mitigate peak heat accumulation on upper residential floors.
-3. **Permeable Ground Pavements**: Replacing impervious asphalt parking zones with permeable turf-grid pavers to improve evaporative cooling.`;
-    }
-
-    if (q.includes("solar") || q.includes("facade") || q.includes("sun")) {
-      return `At ${solarIrr} W/m² incident solar irradiance, unshaded vertical facades absorb substantial thermal load. 
-- **Recommendation**: Integrate dynamic exterior brise-soleil or horizontal overhangs calibrated to Forma's summer sun angles to block direct rays while admitting winter daylight.`;
-    }
-
-    if (q.includes("wet-bulb") || q.includes("safety") || q.includes("worker") || q.includes("health")) {
-      const status = wetBulbC < 27 ? "within safe limits" : "approaching caution thresholds";
-      return `FortyGuard Wet-Bulb reading for this site is **${wetBulbC}°C**, which is currently **${status}** (OSHA heat danger begins > 28°C). 
-- For outdoor residential courtyards, ensure continuous shaded pedestrian walkways and integrate evaporative water features or misting pergolas.`;
-    }
-
-    if (q.includes("orientation") || q.includes("massing") || q.includes("compare")) {
-      return `For this site's climate profile (${meanTempC}°C baseline), orienting long building facades along the East-West axis minimizes direct low-angle solar exposure on eastern/western walls. 
-- Creating open ground-level breezeways aligned with prevailing summer winds will enhance natural air circulation and lower localized temperatures by ~2°C.`;
-    }
-
-    return `Analyzing FortyGuard microclimate layers for your query...
-- **Site Baseline**: ${meanTempC}°C mean temperature, ${solarIrr} W/m² solar irradiance, AQI ${aqi}.
-- **Resilience Insight**: To counteract localized thermal hotspots in your current Forma model, prioritize reflective building envelopes (cool roofs), shaded pedestrian courtyards, and native vegetative green buffers.`;
-  };
-
-  const handleSend = (queryToSend?: string) => {
+  const handleSend = async (queryToSend?: string) => {
     const text = (queryToSend || inputQuery).trim();
-    if (!text) return;
 
-    const userMsg: ChatMessage = {
+    if (!text || isThinking) return;
+
+    const userMessage: ChatMessage = {
       id: `usr_${Date.now()}`,
       sender: "user",
       text,
       timestamp: "Just now",
     };
 
-    const aiMsg: ChatMessage = {
-      id: `ai_${Date.now() + 1}`,
-      sender: "ai",
-      text: generateAiResponse(text),
-      timestamp: "Just now",
-    };
-
-    setMessages((prev) => [...prev, userMsg, aiMsg]);
+    setMessages((previous) => [...previous, userMessage]);
     setInputQuery("");
+    setIsThinking(true);
+
+    try {
+      const result = await runThermalAgent({
+        heatmap,
+        envParams,
+        userQuestion: text,
+      });
+
+      const aiMessage: ChatMessage = {
+        id: `ai_${Date.now()}`,
+        sender: "ai",
+        text: formatAgentResult(result),
+        timestamp: "Just now",
+      };
+
+      setMessages((previous) => [...previous, aiMessage]);
+    } catch (error) {
+      const errorMessage: ChatMessage = {
+        id: `error_${Date.now()}`,
+        sender: "ai",
+        text:
+          `I could not analyse the thermal data.\n\n` +
+          `${error instanceof Error ? error.message : "Unknown error"}`,
+        timestamp: "Just now",
+      };
+
+      setMessages((previous) => [...previous, errorMessage]);
+    } finally {
+      setIsThinking(false);
+    }
   };
 
   return (
     <div class="ai-copilot-card">
       <div class="ai-header">
         <div class="ai-title">
-          <span>🤖</span> AI Climate Copilot
+          <span>🤖</span> Residential Heat Design Agent
         </div>
-        <span class="ai-badge">FortyGuard Context-Aware</span>
+
+        <span class="ai-badge">FortyGuard-powered</span>
       </div>
 
-      {/* Quick Prompts */}
       <div class="quick-prompts-container">
-        {quickPrompts.map((p, i) => (
+        {quickPrompts.map((prompt, index) => (
           <button
-            key={i}
+            key={index}
             type="button"
             class="prompt-chip"
-            onClick={() => handleSend(p)}
+            onClick={() => handleSend(prompt)}
+            disabled={isThinking}
           >
-            {p}
+            {prompt}
           </button>
         ))}
       </div>
 
-      {/* Chat Messages */}
       <div class="chat-messages-container">
-        {messages.map((m) => (
-          <div key={m.id} class={`chat-msg ${m.sender === "ai" ? "msg-ai" : "msg-user"}`}>
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            class={`chat-msg ${
+              message.sender === "ai" ? "msg-ai" : "msg-user"
+            }`}
+          >
             <div class="msg-bubble">
-              <div class="msg-sender">{m.sender === "ai" ? "🌿 Climate AI" : "You"}</div>
-              <div class="msg-text">{m.text}</div>
+              <div class="msg-sender">
+                {message.sender === "ai" ? "🌡️ Heat Design Agent" : "You"}
+              </div>
+
+              <div class="msg-text" style="white-space: pre-wrap">
+                {message.text}
+              </div>
             </div>
           </div>
         ))}
+
+        {isThinking && (
+          <div class="chat-msg msg-ai">
+            <div class="msg-bubble">
+              <div class="msg-sender">🌡️ Heat Design Agent</div>
+              <div class="msg-text">Analysing FortyGuard data...</div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Chat Input */}
       <form
         class="chat-input-form"
-        onSubmit={(e) => {
-          e.preventDefault();
+        onSubmit={(event) => {
+          event.preventDefault();
           handleSend();
         }}
       >
         <input
           type="text"
-          placeholder="Ask a design, heat, or cooling question..."
+          placeholder="Ask about heat exposure or design..."
           value={inputQuery}
-          onInput={(e) => setInputQuery((e.target as HTMLInputElement).value)}
+          onInput={(event) =>
+            setInputQuery((event.target as HTMLInputElement).value)
+          }
           class="chat-text-input"
+          disabled={isThinking}
         />
-        <button type="submit" class="chat-send-btn" disabled={!inputQuery.trim()}>
-          Ask
+
+        <button
+          type="submit"
+          class="chat-send-btn"
+          disabled={!inputQuery.trim() || isThinking}
+        >
+          {isThinking ? "..." : "Ask"}
         </button>
       </form>
     </div>
