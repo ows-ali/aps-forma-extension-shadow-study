@@ -21,7 +21,7 @@ import ResolutionSelector from "./components/ResolutionSelector";
 import PreviewButton from "./components/PreviewButton";
 import ExportButton from "./components/ExportButton";
 
-type AppTab = "thermal" | "compare" | "copilot" | "shadows";
+type AppTab = "thermal" | "compare" | "copilot";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<AppTab>("thermal");
@@ -37,16 +37,6 @@ export default function App() {
   const [isLayerVisible, setIsLayerVisible] = useState<boolean>(true);
   const [layerOpacity, setLayerOpacity] = useState<number>(0.75);
   const [layerPalette, setLayerPalette] = useState<ColorPalette>("turbo");
-
-  // Shadow Study State
-  const [month, setMonth] = useState(6);
-  const [day, setDay] = useState(21);
-  const [interval, setInterval] = useState(30);
-  const [startHour, setStartHour] = useState(8);
-  const [startMinute, setStartMinute] = useState(0);
-  const [endHour, setEndHour] = useState(18);
-  const [endMinute, setEndMinute] = useState(0);
-  const [resolution, setResolution] = useState("2048x1536");
 
   // Load site thermal data from Forma
   const loadSiteData = async (forceRefresh = false, overrideMode?: OperationMode) => {
@@ -146,45 +136,51 @@ export default function App() {
       ? `${(baselineMeanC + 6.8).toFixed(1)}°C`
       : `${((baselineMeanC + 6.8) * 1.8 + 32).toFixed(1)}°F`;
 
+  // App Theme: 'light' (FortyGuard White default) vs 'dark'
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
   return (
-    <div class="urbancool-app">
+    <div class="urbancool-app" data-theme={theme}>
       {/* App Header */}
       <header class="app-header">
         <div class="brand-row">
-          <div class="brand-badge">⚡ FortyGuard × Autodesk Forma</div>
+          <div class="brand-row-top">
+            <div class="brand-badge">⚡ FortyGuard × Autodesk Forma</div>
+            <button
+              type="button"
+              class="theme-toggle-btn"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              title={`Switch to ${theme === "light" ? "Dark" : "Light"} Theme`}
+            >
+              {theme === "light" ? "🌙 Dark" : "☀️ Light"}
+            </button>
+          </div>
           <h1 class="app-title">UrbanCool 3D</h1>
           <div class="app-tagline">Microclimate Heat Risk & Mitigation Digital Twin</div>
         </div>
 
-        {/* Navigation Tabs */}
+        {/* Navigation Tabs (Streamlined 3-Tab FortyGuard Suite) */}
         <nav class="app-tabs">
           <button
             type="button"
             class={`tab-btn ${activeTab === "thermal" ? "tab-active" : ""}`}
             onClick={() => setActiveTab("thermal")}
           >
-            🌐 3D Thermal Twin
+            🌐 Thermal Twin
           </button>
           <button
             type="button"
             class={`tab-btn ${activeTab === "compare" ? "tab-active" : ""}`}
             onClick={() => setActiveTab("compare")}
           >
-            ⚖️ Option Compare
+            🌱 Cooling Simulator
           </button>
           <button
             type="button"
             class={`tab-btn ${activeTab === "copilot" ? "tab-active" : ""}`}
             onClick={() => setActiveTab("copilot")}
           >
-            🤖 AI Copilot
-          </button>
-          <button
-            type="button"
-            class={`tab-btn ${activeTab === "shadows" ? "tab-active" : ""}`}
-            onClick={() => setActiveTab("shadows")}
-          >
-            ☀️ Shadows
+            🤖 Climate Copilot
           </button>
         </nav>
       </header>
@@ -234,7 +230,7 @@ export default function App() {
         )}
 
         {activeTab === "compare" && (
-          <ComparisonView baselineTempC={baselineMeanC} />
+          <ComparisonView baselineTempC={baselineMeanC} unit={unit} />
         )}
 
         {activeTab === "copilot" && thermalData && (
@@ -242,46 +238,6 @@ export default function App() {
             heatmap={thermalData.heatmap}
             envParams={thermalData.envParams}
           />
-        )}
-
-        {activeTab === "shadows" && (
-          <div class="shadow-study-panel">
-            <div class="section-title">☀️ Sun & Shadow Sequence Analysis</div>
-            <DateSelector month={month} setMonth={setMonth} day={day} setDay={setDay} />
-            <TimeSelector
-              startHour={startHour}
-              startMinute={startMinute}
-              endHour={endHour}
-              endMinute={endMinute}
-              setStartHour={setStartHour}
-              setStartMinute={setStartMinute}
-              setEndHour={setEndHour}
-              setEndMinute={setEndMinute}
-            />
-            <IntervalSelector interval={interval} setInterval={setInterval} />
-            <ResolutionSelector resolution={resolution} setResolution={setResolution} />
-            <div class="shadow-actions">
-              <PreviewButton
-                month={month}
-                day={day}
-                startHour={startHour}
-                startMinute={startMinute}
-                endHour={endHour}
-                endMinute={endMinute}
-                interval={interval}
-              />
-              <ExportButton
-                month={month}
-                day={day}
-                startHour={startHour}
-                startMinute={startMinute}
-                endHour={endHour}
-                endMinute={endMinute}
-                resolution={resolution}
-                interval={interval}
-              />
-            </div>
-          </div>
         )}
       </main>
 
