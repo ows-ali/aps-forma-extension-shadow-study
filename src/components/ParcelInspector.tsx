@@ -1,4 +1,5 @@
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
+import { Forma } from "forma-embedded-view-sdk/auto";
 import { ParcelInspectionResult } from "../services/types";
 import { FormaSceneService } from "../services/formaScene";
 import { celsiusToFahrenheit } from "../services/mockData";
@@ -16,6 +17,41 @@ export default function ParcelInspector({
 }: ParcelInspectorProps) {
   const [isDrawing, setIsDrawing] = useState(false);
   const [inspection, setInspection] = useState<ParcelInspectionResult | null>(null);
+  const [inspectSource, setInspectSource] = useState<"building" | "draw">("draw");
+
+  // Auto-inspect when a user clicks/selects any 3D Building in Forma
+  useEffect(() => {
+    let isMounted = true;
+    let unsubCallback: (() => void) | undefined;
+
+    const setupSelectionListener = async () => {
+      try {
+        const sub = await Forma.selection.subscribe(async ({ paths }) => {
+          if (!isMounted || !paths || paths.length === 0) return;
+          const path = paths[0];
+          const result = await FormaSceneService.inspectBuildingPath(
+            path,
+            baselineMeanC,
+            relativeHumidity,
+          );
+          if (result && isMounted) {
+            setInspection(result);
+            setInspectSource("building");
+          }
+        });
+        unsubCallback = sub?.unsubscribe;
+      } catch (err) {
+        console.warn("Forma selection listener could not be registered:", err);
+      }
+    };
+
+    setupSelectionListener();
+
+    return () => {
+      isMounted = false;
+      unsubCallback?.();
+    };
+  }, [baselineMeanC, relativeHumidity]);
 
   const handleStartDrawing = async () => {
     setIsDrawing(true);
@@ -26,6 +62,7 @@ export default function ParcelInspector({
       );
       if (result) {
         setInspection(result);
+        setInspectSource("draw");
       }
     } finally {
       setIsDrawing(false);
@@ -64,7 +101,7 @@ export default function ParcelInspector({
     <div class="parcel-card">
       <div class="parcel-header">
         <div class="parcel-title">
-          <span>📐</span> Parcel & Building Inspector
+          <span>🏢</span> Building & Parcel Microclimate Inspector
         </div>
         {inspection && (
           <button
@@ -79,7 +116,7 @@ export default function ParcelInspector({
 
       <div class="parcel-body">
         <p class="parcel-desc">
-          Click below and draw a polygon in the Forma 3D canvas to evaluate microclimate heat exposure for a specific building roof, courtyard, or parcel.
+          Click any <strong>3D Building in scene</strong> to inspect its roof heat, or draw a polygon on the ground for plazas and courtyards.
         </p>
 
         <button
@@ -88,13 +125,15 @@ export default function ParcelInspector({
           onClick={handleStartDrawing}
           disabled={isDrawing}
         >
-          {isDrawing ? "✏️ Drawing in 3D Viewport... (Click points to finish)" : "🎯 Draw & Inspect Parcel in 3D"}
+          {isDrawing ? "✏️ Drawing in 3D Viewport... (Click points to finish)" : "🎯 Draw & Inspect Ground Polygon"}
         </button>
 
         {inspection && (
           <div class="inspection-results">
             <div class="result-header">
-              <span class="parcel-area-tag">Area: {inspection.areaSqMeters.toLocaleString()} m²</span>
+              <span class="parcel-area-tag">
+                {inspectSource === "building" ? "🏢 3D Building Roof" : "📐 Ground Area"}: {inspection.areaSqMeters.toLocaleString()} m²
+              </span>
               <span class={`status-badge ${getRiskBadgeClass(inspection.riskCategory)}`}>
                 {inspection.riskCategory} Heat Risk
               </span>
@@ -127,7 +166,9 @@ export default function ParcelInspector({
             </div>
 
             <div class="recommendations-box">
-              <div class="rec-title">🌿 Targeted Cooling Interventions:</div>
+              <div class="rec-title">
+                {inspectSource === "building" ? "🏗️ Building & Roof Cooling Interventions:" : "🌿 Ground & Landscape Cooling Interventions:"}
+              </div>
               <ul class="rec-list">
                 {inspection.recommendations.map((rec, i) => (
                   <li key={i}>{rec}</li>

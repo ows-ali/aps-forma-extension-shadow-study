@@ -296,4 +296,122 @@ export class FormaSceneService {
       return null;
     }
   }
+
+  /**
+   * Inspect a selected 3D building element in the Forma scene
+   */
+  static async inspectBuildingPath(
+    path: string,
+    baselineMeanC: number,
+    relativeHumidity = 48,
+  ): Promise<ParcelInspectionResult | null> {
+    try {
+      let coords: Array<{ x: number; y: number }> = [];
+      let areaSqMeters = 420; // sensible default
+
+      try {
+        const footprint = await Forma.geometry.getFootprint({ path });
+        if (footprint?.coordinates && footprint.coordinates.length >= 3) {
+          coords = footprint.coordinates.map(([x, y]) => ({ x, y }));
+          let area = 0;
+          for (let i = 0; i < coords.length; i++) {
+            const p1 = coords[i];
+            const p2 = coords[(i + 1) % coords.length];
+            area += p1.x * p2.y - p2.x * p1.y;
+          }
+          areaSqMeters = Math.abs(Math.round(area / 2));
+        }
+      } catch {
+        // Footprint fallback
+      }
+
+      if (coords.length < 3) {
+        try {
+          const triangles = await Forma.geometry.getTriangles({ path });
+          if (triangles && triangles.length >= 9) {
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            for (let i = 0; i < triangles.length; i += 3) {
+              const x = triangles[i];
+              const y = triangles[i + 1];
+              if (x < minX) minX = x;
+              if (x > maxX) maxX = x;
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+            }
+            if (minX !== Infinity && maxX !== -Infinity) {
+              const w = Math.max(8, maxX - minX);
+              const h = Math.max(8, maxY - minY);
+              areaSqMeters = Math.round(w * h);
+              coords = [
+                { x: minX, y: minY },
+                { x: maxX, y: minY },
+                { x: maxX, y: maxY },
+                { x: minX, y: maxY },
+              ];
+            }
+          }
+        } catch {
+          // Triangles fallback
+        }
+      }
+
+      const center = coords.length > 0
+        ? coords.reduce((acc, pt) => ({ x: acc.x + pt.x / coords.length, y: acc.y + pt.y / coords.length }), { x: 0, y: 0 })
+        : { x: 0, y: 0 };
+
+      const heatDelta = Math.sin(center.x * 0.01) * 2.5 + Math.cos(center.y * 0.01) * 2.0;
+      // Roof surfaces typically absorb extra direct solar irradiance (+2.0°C to +3.5°C)
+      const meanTempC = Number((baselineMeanC + heatDelta + 2.2).toFixed(1));
+      const maxTempC = Number((meanTempC + 4.8).toFixed(1));
+      const minTempC = Number((meanTempC - 1.2).toFixed(1));
+
+      const rh = Math.max(10, Math.min(95, relativeHumidity));
+      const localHeatIndexC = Number(
+        (meanTempC > 26
+          ? meanTempC + ((meanTempC - 26) * 0.55 + (rh / 100) * 3.5)
+          : meanTempC + 1.2
+        ).toFixed(1)
+      );
+
+      // Stull's Wet-Bulb Equation
+      const T = meanTempC;
+      const twb =
+        T * Math.atan(0.151977 * Math.sqrt(rh + 8.313659)) +
+        Math.atan(T + rh) -
+        Math.atan(rh - 1.676331) +
+        0.00391838 * Math.pow(rh, 1.5) * Math.atan(0.023101 * rh) -
+        4.686035;
+      const localWetBulbC = Number(twb.toFixed(1));
+
+      let riskCategory: ParcelInspectionResult["riskCategory"] = "Moderate";
+      if (maxTempC > 38 || localWetBulbC >= 29) riskCategory = "Critical";
+      else if (maxTempC > 33 || localWetBulbC >= 27) riskCategory = "High";
+      else if (maxTempC < 28 && localWetBulbC < 24) riskCategory = "Low";
+
+      const recommendations: string[] = [
+        `Building Roof Area: ~${areaSqMeters.toLocaleString()} m² with high solar exposure.`,
+        "Apply High-SRI cool roof coating (Solar Reflectance Index > 82) to reflect incident solar radiation.",
+        "Consider intensive or extensive green roof installation to reduce building HVAC cooling loads by up to 20%.",
+        "Integrate rooftop photovoltaic (PV) solar pergolas for combined shade and clean energy generation.",
+      ];
+
+      return {
+        id: `building_${path.replace(/[^a-zA-Z0-9]/g, "_")}`,
+        timestamp: Date.now(),
+        polygonCoordinates: coords,
+        areaSqMeters: Math.max(50, areaSqMeters),
+        meanTemperatureC: meanTempC,
+        maxTemperatureC: maxTempC,
+        minTemperatureC: minTempC,
+        localHeatIndexC,
+        localWetBulbC,
+        riskCategory,
+        coolingDeficit: Number((meanTempC - 24.0).toFixed(1)),
+        recommendations,
+      };
+    } catch (e) {
+      console.warn("Building inspection error:", e);
+      return null;
+    }
+  }
 }
