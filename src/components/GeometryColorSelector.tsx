@@ -39,22 +39,25 @@ function getPathOfElements(
  */
 async function colorGround(color: string) {
   const bbox = await Forma.terrain.getBbox();
+  const width = Math.max(100, bbox.max.x - bbox.min.x);
+  const height = Math.max(100, bbox.max.y - bbox.min.y);
+  const centerX = (bbox.min.x + bbox.max.x) / 2;
+  const centerY = (bbox.min.y + bbox.max.y) / 2;
+
   const canvas = document.createElement("canvas");
-  const width = bbox.max.x - bbox.min.x;
-  const height = bbox.max.y - bbox.min.y;
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = Math.max(256, Math.min(1024, Math.round(width)));
+  canvas.height = Math.max(256, Math.min(1024, Math.round(height)));
   const context = canvas.getContext("2d");
   if (!context) {
     return;
   }
   context.fillStyle = color;
-  context.fillRect(0, 0, width, height);
+  context.fillRect(0, 0, canvas.width, canvas.height);
   return await Forma.terrain.groundTexture.add({
     name: "shadow-study",
     canvas: canvas,
-    position: { x: 0, y: 0, z: 0 },
-    scale: { x: 1, y: 1 },
+    position: { x: centerX, y: centerY, z: 0 },
+    scale: { x: width / canvas.width, y: height / canvas.height },
   });
 }
 

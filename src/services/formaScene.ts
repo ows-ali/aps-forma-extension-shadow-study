@@ -56,8 +56,10 @@ export function createThermalCanvas(
   opacity = 0.75,
 ): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
-  canvas.width = Math.max(256, Math.min(1024, Math.round(width)));
-  canvas.height = Math.max(256, Math.min(1024, Math.round(height)));
+  const targetWidth = Math.max(512, Math.min(1024, Math.round(width)));
+  const targetHeight = Math.max(512, Math.min(1024, Math.round(height)));
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
   const ctx = canvas.getContext("2d");
   if (!ctx) return canvas;
 
@@ -69,46 +71,76 @@ export function createThermalCanvas(
   const features = heatmap.geojson?.features || heatmap.features || [];
 
   if (features.length === 0) {
-    // Fallback radial gradient if no features
+    // Fallback smooth radial heat distribution if no features
     const radGrad = ctx.createRadialGradient(
       canvas.width / 2,
       canvas.height / 2,
-      20,
+      10,
       canvas.width / 2,
       canvas.height / 2,
-      canvas.width / 2,
+      canvas.width * 0.6,
     );
     radGrad.addColorStop(0, getPaletteColor(0.9, palette, opacity));
-    radGrad.addColorStop(0.5, getPaletteColor(0.5, palette, opacity * 0.8));
-    radGrad.addColorStop(1, getPaletteColor(0.1, palette, opacity * 0.4));
+    radGrad.addColorStop(0.4, getPaletteColor(0.65, palette, opacity * 0.85));
+    radGrad.addColorStop(0.7, getPaletteColor(0.4, palette, opacity * 0.7));
+    radGrad.addColorStop(1, getPaletteColor(0.15, palette, opacity * 0.5));
     ctx.fillStyle = radGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     return canvas;
   }
 
-  // Draw grid of cells with smooth blending
+  // Draw grid to offscreen canvas for smooth bilinear thermal gradient blending
   const cols = Math.ceil(Math.sqrt(features.length));
   const rows = Math.ceil(features.length / cols);
-  const cellW = canvas.width / cols;
-  const cellH = canvas.height / rows;
+  
+  const offscreen = document.createElement("canvas");
+  offscreen.width = cols;
+  offscreen.height = rows;
+  const offCtx = offscreen.getContext("2d");
 
-  for (let idx = 0; idx < features.length; idx++) {
-    const f = features[idx];
-    const rawVal =
-      f.properties.mean_temperature ??
-      f.properties.value ??
-      stats.mean;
-    const normalized = (rawVal - minVal) / range;
+  if (offCtx) {
+    const imgData = offCtx.createImageData(cols, rows);
+    for (let idx = 0; idx < features.length; idx++) {
+      const f = features[idx];
+      const rawVal =
+        f.properties.mean_temperature ??
+        f.properties.value ??
+        stats.mean;
+      const normalized = Math.max(0, Math.min(1, (rawVal - minVal) / range));
 
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      const pixelIdx = (row * cols + col) * 4;
 
-    const x = col * cellW;
-    const y = row * cellH;
+      // Turbo or selected palette RGB
+      const colStr = getPaletteColor(normalized, palette, opacity);
+      const match = colStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+      if (match) {
+        imgData.data[pixelIdx] = parseInt(match[1], 10);
+        imgData.data[pixelIdx + 1] = parseInt(match[2], 10);
+        imgData.data[pixelIdx + 2] = parseInt(match[3], 10);
+        imgData.data[pixelIdx + 3] = Math.round(parseFloat(match[4] ?? "1") * 255);
+      }
+    }
+    offCtx.putImageData(imgData, 0, 0);
 
-    // Draw cell with soft gradient overlay
-    ctx.fillStyle = getPaletteColor(normalized, palette, opacity);
-    ctx.fillRect(x, y, cellW + 1, cellH + 1);
+    // Upscale to target canvas with smooth filtering across entire area
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(offscreen, 0, 0, targetWidth, targetHeight);
+  } else {
+    // Direct grid fallback
+    const cellW = targetWidth / cols;
+    const cellH = targetHeight / rows;
+    for (let idx = 0; idx < features.length; idx++) {
+      const f = features[idx];
+      const rawVal = f.properties.mean_temperature ?? f.properties.value ?? stats.mean;
+      const normalized = Math.max(0, Math.min(1, (rawVal - minVal) / range));
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      ctx.fillStyle = getPaletteColor(normalized, palette, opacity);
+      ctx.fillRect(col * cellW, row * cellH, cellW + 1, cellH + 1);
+    }
   }
 
   return canvas;
@@ -117,6 +149,7 @@ export function createThermalCanvas(
 export class FormaSceneService {
   /**
    * Project thermal heatmap onto Forma 3D Terrain
+   * Note: In Forma SDK, position defines the CENTER of the texture, and scale defines meters per pixel.
    */
   static async applyThermalGroundTexture(
     heatmap: FortyGuardHeatmapResult,
@@ -127,6 +160,11 @@ export class FormaSceneService {
       const bbox = await Forma.terrain.getBbox();
       const width = Math.max(100, bbox.max.x - bbox.min.x);
       const height = Math.max(100, bbox.max.y - bbox.min.y);
+      
+      // Calculate true center coordinates of the terrain
+      const centerX = (bbox.min.x + bbox.max.x) / 2;
+      const centerY = (bbox.min.y + bbox.max.y) / 2;
+      const centerZ = ((bbox.min.z ?? 0) + (bbox.max.z ?? 0)) / 2;
 
       const canvas = createThermalCanvas(heatmap, width, height, palette, opacity);
 
@@ -134,9 +172,9 @@ export class FormaSceneService {
         name: TEXTURE_LAYER_NAME,
         canvas,
         position: {
-          x: bbox.min.x,
-          y: bbox.min.y,
-          z: bbox.min.z ?? 0,
+          x: centerX,
+          y: centerY,
+          z: 1, // Layer above base terrain
         },
         scale: {
           x: width / canvas.width,
