@@ -566,28 +566,57 @@ input:checked + .switch-slider:before {
   gap: 6px;
 }
 
+.result-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+
 .sub-metric {
   background: var(--fg-bg-card);
-  padding: 4px 6px;
-  border-radius: 4px;
+  padding: 5px 4px;
+  border-radius: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+  justify-content: center;
+  min-height: 48px;
 }
 
 .sub-label {
-  font-size: 9px;
+  font-size: 8.5px;
   color: var(--fg-text-muted);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .sub-val {
-  font-size: 12px;
+  font-size: 11.5px;
+  font-weight: 800;
+  margin: 1px 0;
+}
+
+.sub-sub-label {
+  font-size: 8px;
+  color: var(--fg-text-muted);
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.sub-status-tag {
+  font-size: 7.5px;
   font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-top: 1px;
 }
 
 .text-red { color: #f87171; }
 .text-green { color: #34d399; }
 .text-blue { color: #38bdf8; }
+.text-orange { color: #fb923c; }
+.text-purple { color: #c084fc; }
 
 .recommendations-box {
   display: flex;

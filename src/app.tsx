@@ -225,7 +225,11 @@ export default function App() {
             />
 
             {/* Parcel Drawing Inspector */}
-            <ParcelInspector baselineMeanC={baselineMeanC} />
+            <ParcelInspector
+              baselineMeanC={baselineMeanC}
+              relativeHumidity={thermalData?.envParams.relative_humidity_percent ?? 48}
+              unit={unit}
+            />
           </>
         )}
 

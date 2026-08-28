@@ -85,8 +85,10 @@ export interface ParcelInspectionResult {
   meanTemperatureC: number;
   maxTemperatureC: number;
   minTemperatureC: number;
+  localHeatIndexC: number;
+  localWetBulbC: number;
   riskCategory: "Low" | "Moderate" | "High" | "Critical";
-  coolingDeficit: number; // delta vs baseline comfort (25°C)
+  coolingDeficit: number; // delta vs baseline comfort (24°C)
   recommendations: string[];
 }
 

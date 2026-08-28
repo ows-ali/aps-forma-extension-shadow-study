@@ -202,6 +202,7 @@ export class FormaSceneService {
    */
   static async inspectDrawnParcel(
     baselineMeanC: number,
+    relativeHumidity = 48,
   ): Promise<ParcelInspectionResult | null> {
     try {
       // Prompt user to draw in Forma 3D viewport
@@ -230,11 +231,30 @@ export class FormaSceneService {
       const maxTempC = Number((meanTempC + 3.8).toFixed(1));
       const minTempC = Number((meanTempC - 2.4).toFixed(1));
 
+      // Calculate Local Heat Index (Feels Like) & Stull Wet-Bulb for this specific parcel
+      const rh = Math.max(10, Math.min(95, relativeHumidity));
+      const localHeatIndexC = Number(
+        (meanTempC > 26
+          ? meanTempC + ((meanTempC - 26) * 0.55 + (rh / 100) * 3.5)
+          : meanTempC + 1.2
+        ).toFixed(1)
+      );
+
+      // Stull's Wet-Bulb Equation
+      const T = meanTempC;
+      const twb =
+        T * Math.atan(0.151977 * Math.sqrt(rh + 8.313659)) +
+        Math.atan(T + rh) -
+        Math.atan(rh - 1.676331) +
+        0.00391838 * Math.pow(rh, 1.5) * Math.atan(0.023101 * rh) -
+        4.686035;
+      const localWetBulbC = Number(twb.toFixed(1));
+
       // Determine risk category
       let riskCategory: ParcelInspectionResult["riskCategory"] = "Moderate";
-      if (maxTempC > 38) riskCategory = "Critical";
-      else if (maxTempC > 33) riskCategory = "High";
-      else if (maxTempC < 28) riskCategory = "Low";
+      if (maxTempC > 38 || localWetBulbC >= 29) riskCategory = "Critical";
+      else if (maxTempC > 33 || localWetBulbC >= 27) riskCategory = "High";
+      else if (maxTempC < 28 && localWetBulbC < 24) riskCategory = "Low";
 
       // Tailored actionable cooling recommendations
       const recommendations: string[] = [];
@@ -265,6 +285,8 @@ export class FormaSceneService {
         meanTemperatureC: meanTempC,
         maxTemperatureC: maxTempC,
         minTemperatureC: minTempC,
+        localHeatIndexC,
+        localWetBulbC,
         riskCategory,
         coolingDeficit: Number((meanTempC - 24.0).toFixed(1)),
         recommendations,
