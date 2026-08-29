@@ -220,6 +220,35 @@ body {
   color: var(--fg-text-muted);
 }
 
+.mode-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key-drawer-btn {
+  background: var(--fg-bg-input);
+  border: 1px solid var(--fg-border);
+  color: var(--fg-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.key-drawer-btn:hover {
+  border-color: var(--fg-border-accent);
+  color: var(--fg-text-main);
+}
+
+.key-drawer-btn.key-configured {
+  background: rgba(2, 132, 199, 0.1);
+  border-color: rgba(2, 132, 199, 0.3);
+  color: var(--fg-accent);
+}
+
 .mode-toggle-btn {
   font-size: 11px;
   font-weight: 600;
@@ -248,6 +277,59 @@ body {
 
 .btn-live:hover {
   background: rgba(2, 132, 199, 0.2);
+}
+
+/* Key Drawer */
+.api-key-drawer, .llm-settings-drawer {
+  background: var(--fg-bg-input);
+  border: 1px solid var(--fg-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.key-drawer-header, .drawer-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--fg-text-main);
+}
+
+.key-input-row {
+  display: flex;
+  gap: 6px;
+}
+
+.key-text-input {
+  flex: 1;
+  background: var(--fg-bg-card);
+  border: 1px solid var(--fg-border);
+  color: var(--fg-text-main);
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 10.5px;
+  outline: none;
+}
+
+.key-text-input:focus {
+  border-color: var(--fg-border-accent);
+}
+
+.key-save-btn {
+  background: var(--fg-accent);
+  color: white;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.key-help-sub {
+  font-size: 8.5px;
+  color: var(--fg-text-muted);
 }
 
 .mode-notice {
@@ -928,6 +1010,57 @@ input:checked + .switch-slider:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.ai-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.copilot-settings-btn {
+  background: var(--fg-bg-input);
+  border: 1px solid var(--fg-border);
+  color: var(--fg-text-muted);
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.copilot-settings-btn:hover {
+  border-color: var(--fg-border-accent);
+  color: var(--fg-text-main);
+}
+
+.copilot-settings-btn.settings-active {
+  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(124, 58, 237, 0.3);
+  color: var(--fg-purple);
+}
+
+.provider-select-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.provider-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--fg-text-muted);
+}
+
+.provider-select {
+  background: var(--fg-bg-card);
+  border: 1px solid var(--fg-border);
+  color: var(--fg-text-main);
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  outline: none;
 }
 
 .ai-title {

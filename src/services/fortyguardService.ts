@@ -7,6 +7,7 @@ import { generateProceduralMockData } from "./mockData";
 
 const CACHE_PREFIX = "fortyguard_cache_";
 const MODE_STORAGE_KEY = "fortyguard_mode";
+const API_KEY_STORAGE_KEY = "fortyguard_custom_api_key";
 
 export type OperationMode = "mock" | "live";
 
@@ -24,6 +25,24 @@ export class FortyGuardService {
    */
   static setMode(mode: OperationMode): void {
     localStorage.setItem(MODE_STORAGE_KEY, mode);
+  }
+
+  /**
+   * Get custom FortyGuard API key stored in user browser
+   */
+  static getApiKey(): string {
+    return localStorage.getItem(API_KEY_STORAGE_KEY) || "";
+  }
+
+  /**
+   * Save custom FortyGuard API key in user browser
+   */
+  static setApiKey(key: string): void {
+    if (key.trim()) {
+      localStorage.setItem(API_KEY_STORAGE_KEY, key.trim());
+    } else {
+      localStorage.removeItem(API_KEY_STORAGE_KEY);
+    }
   }
 
   /**
@@ -74,10 +93,16 @@ export class FortyGuardService {
     payload: Record<string, unknown>,
     maxTimeoutMs: number = 90000,
   ): Promise<unknown> {
+    const customKey = this.getApiKey();
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (customKey) {
+      headers["api-key"] = customKey;
+    }
+
     // 1. Submit task
     const submitResp = await fetch(`/api/fortyguard${endpoint}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(payload),
     });
 
