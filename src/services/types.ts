@@ -82,6 +82,8 @@ export interface ParcelInspectionResult {
   timestamp: number;
   polygonCoordinates: Array<{ x: number; y: number; z?: number }>;
   areaSqMeters: number;
+  buildingHeightMeters?: number;
+  floorCount?: number;
   meanTemperatureC: number;
   maxTemperatureC: number;
   minTemperatureC: number;

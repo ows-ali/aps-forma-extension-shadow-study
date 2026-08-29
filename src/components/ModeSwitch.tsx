@@ -4,10 +4,11 @@ import { FortyGuardService, OperationMode } from "../services/fortyguardService"
 interface ModeSwitchProps {
   mode: OperationMode;
   onToggleMode: (newMode: OperationMode) => void;
+  onSaveKey?: () => void;
   notice?: string;
 }
 
-export default function ModeSwitch({ mode, onToggleMode, notice }: ModeSwitchProps) {
+export default function ModeSwitch({ mode, onToggleMode, onSaveKey, notice }: ModeSwitchProps) {
   const isMock = mode === "mock";
   const [showKeyDrawer, setShowKeyDrawer] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState(FortyGuardService.getApiKey());
@@ -17,6 +18,9 @@ export default function ModeSwitch({ mode, onToggleMode, notice }: ModeSwitchPro
     FortyGuardService.setApiKey(apiKeyInput);
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
+    if (onSaveKey) {
+      onSaveKey();
+    }
   };
 
   const hasKey = Boolean(FortyGuardService.getApiKey());
@@ -73,7 +77,7 @@ export default function ModeSwitch({ mode, onToggleMode, notice }: ModeSwitchPro
               class="key-text-input"
             />
             <button type="button" class="key-save-btn" onClick={handleSaveKey}>
-              {isSaved ? "✓ Saved" : "Save"}
+              {isSaved ? "✓ Saved & Testing..." : "Save & Test"}
             </button>
           </div>
           <div class="key-help-sub">
@@ -83,8 +87,25 @@ export default function ModeSwitch({ mode, onToggleMode, notice }: ModeSwitchPro
       )}
 
       {notice && (
-        <div class={`mode-notice ${isMock ? "notice-mock" : "notice-live"}`}>
-          ℹ️ {notice}
+        <div
+          class={`mode-notice ${
+            notice.startsWith("❌")
+              ? "notice-error"
+              : isMock
+              ? "notice-mock"
+              : "notice-live"
+          }`}
+        >
+          <div class="notice-text">{notice}</div>
+          {notice.startsWith("❌") && (
+            <button
+              type="button"
+              class="notice-fallback-btn"
+              onClick={() => onToggleMode("mock")}
+            >
+              🛡️ Switch to Demo / Mock Mode
+            </button>
+          )}
         </div>
       )}
     </div>

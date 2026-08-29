@@ -327,6 +327,49 @@ body {
   cursor: pointer;
 }
 
+.key-test-btn {
+  background: var(--fg-bg-card);
+  color: var(--fg-text-main);
+  border: 1px solid var(--fg-border);
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.key-test-btn:hover {
+  border-color: var(--fg-border-accent);
+}
+
+.drawer-status-msg {
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+
+.status-success {
+  background: rgba(5, 150, 105, 0.1);
+  border-color: rgba(5, 150, 105, 0.3);
+  color: var(--fg-green);
+  font-weight: 600;
+}
+
+.status-error {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.35);
+  color: var(--fg-red);
+  font-weight: 600;
+}
+
+.status-info {
+  background: rgba(2, 132, 199, 0.08);
+  border-color: rgba(2, 132, 199, 0.25);
+  color: var(--fg-accent);
+}
+
 .key-help-sub {
   font-size: 8.5px;
   color: var(--fg-text-muted);
@@ -334,9 +377,12 @@ body {
 
 .mode-notice {
   font-size: 10.5px;
-  padding: 5px 8px;
+  padding: 6px 8px;
   border-radius: 5px;
   border: 1px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .notice-mock {
@@ -349,6 +395,32 @@ body {
   background: rgba(2, 132, 199, 0.08);
   border-color: rgba(2, 132, 199, 0.25);
   color: var(--fg-accent);
+}
+
+.notice-error {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.4);
+  color: var(--fg-red);
+  font-weight: 600;
+}
+
+.notice-fallback-btn {
+  background: var(--fg-bg-card);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: var(--fg-text-main);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.15s;
+}
+
+.notice-fallback-btn:hover {
+  background: rgba(5, 150, 105, 0.15);
+  border-color: var(--fg-green);
+  color: var(--fg-green);
 }
 
 /* Metrics Dashboard */
@@ -1115,6 +1187,46 @@ input:checked + .switch-slider:before {
 .chat-msg {
   display: flex;
   flex-direction: column;
+}
+
+.drawer-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.use-default-btn {
+  background: rgba(5, 150, 105, 0.12);
+  border: 1px solid rgba(5, 150, 105, 0.3);
+  color: var(--fg-green);
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.use-default-btn:hover {
+  background: rgba(5, 150, 105, 0.25);
+}
+
+.chat-fallback-btn {
+  display: inline-block;
+  margin-top: 6px;
+  background: var(--fg-bg-card);
+  border: 1px solid var(--fg-green);
+  color: var(--fg-green);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chat-fallback-btn:hover {
+  background: rgba(5, 150, 105, 0.15);
 }
 
 .msg-bubble {

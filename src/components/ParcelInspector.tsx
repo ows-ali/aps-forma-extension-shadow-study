@@ -132,7 +132,9 @@ export default function ParcelInspector({
           <div class="inspection-results">
             <div class="result-header">
               <span class="parcel-area-tag">
-                {inspectSource === "building" ? "🏢 3D Building Roof" : "📐 Ground Area"}: {inspection.areaSqMeters.toLocaleString()} m²
+                {inspectSource === "building"
+                  ? `🏢 3D Building (${inspection.buildingHeightMeters ?? 18}m / ~${inspection.floorCount ?? 5} fl) • Roof: ${inspection.areaSqMeters.toLocaleString()} m²`
+                  : `📐 Ground Area: ${inspection.areaSqMeters.toLocaleString()} m²`}
               </span>
               <span class={`status-badge ${getRiskBadgeClass(inspection.riskCategory)}`}>
                 {inspection.riskCategory} Heat Risk

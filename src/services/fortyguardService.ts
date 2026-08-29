@@ -107,8 +107,18 @@ export class FortyGuardService {
     });
 
     if (!submitResp.ok) {
-      const errorText = await submitResp.text();
-      throw new Error(`FortyGuard API ${endpoint} failed (${submitResp.status}): ${errorText}`);
+      let errorDetail = "";
+      try {
+        const errJson = await submitResp.json();
+        errorDetail = errJson?.message || errJson?.error || JSON.stringify(errJson);
+      } catch {
+        errorDetail = await submitResp.text();
+      }
+
+      if (submitResp.status === 401 || submitResp.status === 403) {
+        throw new Error(`Authentication Failed (${submitResp.status}): Invalid or unauthorized FortyGuard API Key.`);
+      }
+      throw new Error(`FortyGuard API ${endpoint} failed (${submitResp.status}): ${errorDetail || submitResp.statusText}`);
     }
 
     const submitJson = await submitResp.json();
@@ -256,11 +266,12 @@ export class FortyGuardService {
       this.setCachedData(liveData);
       return { data: liveData, notice: "Live FortyGuard data successfully fetched & cached" };
     } catch (err) {
-      console.error("Live FortyGuard fetch failed, falling back to mock mode:", err);
+      console.error("Live FortyGuard fetch failed:", err);
       const fallbackMock = generateProceduralMockData(projectId, lat, lng, bbox);
+      const errMsg = err instanceof Error ? err.message : "Unknown error";
       return {
         data: fallbackMock,
-        notice: `Live API call failed (${err instanceof Error ? err.message : "Error"}). Loaded mock data fallback.`,
+        notice: `❌ Live API Failed: ${errMsg} (Check '🔑 Set Key' or verify credentials).`,
       };
     }
   }

@@ -26,12 +26,30 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api\/fortyguard/, ""),
           headers: apiKey ? { "api-key": apiKey } : {},
           configure: (proxy) => {
-            proxy.on("proxyReq", (proxyReq) => {
-              if (apiKey) {
+            proxy.on("proxyReq", (proxyReq, req) => {
+              const clientKey = req.headers["api-key"] || req.headers["x-api-key"];
+              if (clientKey) {
+                proxyReq.setHeader("api-key", clientKey as string);
+              } else if (apiKey) {
                 proxyReq.setHeader("api-key", apiKey);
               }
             });
           },
+        },
+        "/api/groq": {
+          target: "https://api.groq.com/openai",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/groq/, ""),
+        },
+        "/api/openai": {
+          target: "https://api.openai.com",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/openai/, ""),
+        },
+        "/api/gemini": {
+          target: "https://generativelanguage.googleapis.com",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/gemini/, ""),
         },
       },
     },

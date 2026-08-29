@@ -155,8 +155,8 @@ export default function App() {
               {theme === "light" ? "🌙 Dark" : "☀️ Light"}
             </button>
           </div>
-          <h1 class="app-title">UrbanCool 3D</h1>
-          <div class="app-tagline">Microclimate Heat Risk & Mitigation Digital Twin</div>
+          <h1 class="app-title">FortyForma™ 3D</h1>
+          <div class="app-tagline">Microclimate Heat Intelligence & Thermal Digital Twin</div>
         </div>
 
         {/* Navigation Tabs (Streamlined 3-Tab FortyGuard Suite) */}
@@ -193,6 +193,11 @@ export default function App() {
             <ModeSwitch
               mode={mode}
               onToggleMode={handleToggleMode}
+              onSaveKey={() => {
+                FortyGuardService.setMode("live");
+                setMode("live");
+                loadSiteData(true, "live");
+              }}
               notice={notice}
             />
 
@@ -243,7 +248,7 @@ export default function App() {
 
       {/* Footer */}
       <footer class="app-footer">
-        FortyGuard Hackathon • Track 1 Digital Twin • Team Berlin
+        FortyGuard Global AI Hackathon • Track 1: Resilient Cities & Infrastructure
       </footer>
     </div>
   );

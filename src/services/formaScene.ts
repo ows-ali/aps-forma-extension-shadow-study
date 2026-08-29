@@ -256,24 +256,24 @@ export class FormaSceneService {
       else if (maxTempC > 33 || localWetBulbC >= 27) riskCategory = "High";
       else if (maxTempC < 28 && localWetBulbC < 24) riskCategory = "Low";
 
-      // Tailored actionable cooling recommendations
+      // Tailored actionable cooling recommendations for GROUND parcels
       const recommendations: string[] = [];
       if (riskCategory === "Critical" || riskCategory === "High") {
         recommendations.push(
-          "High urban heat exposure: Integrate 30%+ deciduous tree canopy buffer along south/west facades.",
+          "High urban heat exposure on ground: Integrate 30%+ deciduous tree canopy buffer to block direct solar irradiance.",
         );
         recommendations.push(
-          "Specify high-albedo cool roof membrane (SRI > 82) to reflect incident solar radiation.",
+          "Replace dark impervious asphalt paving with permeable turf-grid pavers or high-albedo stone pavers (SRI > 40).",
         );
         recommendations.push(
-          "Replace impervious asphalt paving with permeable turf-grid pavers.",
+          "Incorporate shaded pedestrian pergolas and evaporative water features along main walkway corridors.",
         );
       } else {
         recommendations.push(
-          "Favorable thermal baseline: Maintain existing breezeways and natural cross-ventilation corridors.",
+          "Favorable thermal baseline: Maintain existing ground breezeways and natural cross-ventilation corridors.",
         );
         recommendations.push(
-          "Incorporate localized bioswales and shade trellises for pedestrian pathways.",
+          "Incorporate localized bioswales, rain gardens, and native drought-tolerant ground cover.",
         );
       }
 
@@ -308,6 +308,8 @@ export class FormaSceneService {
     try {
       let coords: Array<{ x: number; y: number }> = [];
       let areaSqMeters = 420; // sensible default
+      let buildingHeightMeters = 18; // default ~5 floors
+      let floorCount = 5;
 
       try {
         const footprint = await Forma.geometry.getFootprint({ path });
@@ -325,22 +327,26 @@ export class FormaSceneService {
         // Footprint fallback
       }
 
-      if (coords.length < 3) {
-        try {
-          const triangles = await Forma.geometry.getTriangles({ path });
-          if (triangles && triangles.length >= 9) {
-            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-            for (let i = 0; i < triangles.length; i += 3) {
-              const x = triangles[i];
-              const y = triangles[i + 1];
-              if (x < minX) minX = x;
-              if (x > maxX) maxX = x;
-              if (y < minY) minY = y;
-              if (y > maxY) maxY = y;
-            }
-            if (minX !== Infinity && maxX !== -Infinity) {
-              const w = Math.max(8, maxX - minX);
-              const h = Math.max(8, maxY - minY);
+      try {
+        const triangles = await Forma.geometry.getTriangles({ path });
+        if (triangles && triangles.length >= 9) {
+          let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+          let minZ = Infinity, maxZ = -Infinity;
+          for (let i = 0; i < triangles.length; i += 3) {
+            const x = triangles[i];
+            const y = triangles[i + 1];
+            const z = triangles[i + 2];
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+            if (z < minZ) minZ = z;
+            if (z > maxZ) maxZ = z;
+          }
+          if (minX !== Infinity && maxX !== -Infinity) {
+            const w = Math.max(8, maxX - minX);
+            const h = Math.max(8, maxY - minY);
+            if (coords.length < 3) {
               areaSqMeters = Math.round(w * h);
               coords = [
                 { x: minX, y: minY },
@@ -350,9 +356,13 @@ export class FormaSceneService {
               ];
             }
           }
-        } catch {
-          // Triangles fallback
+          if (minZ !== Infinity && maxZ !== -Infinity && maxZ > minZ) {
+            buildingHeightMeters = Math.max(3, Math.round(maxZ - minZ));
+            floorCount = Math.max(1, Math.round(buildingHeightMeters / 3.3));
+          }
         }
+      } catch {
+        // Triangles fallback
       }
 
       const center = coords.length > 0
@@ -360,8 +370,9 @@ export class FormaSceneService {
         : { x: 0, y: 0 };
 
       const heatDelta = Math.sin(center.x * 0.01) * 2.5 + Math.cos(center.y * 0.01) * 2.0;
-      // Roof surfaces typically absorb extra direct solar irradiance (+2.0°C to +3.5°C)
-      const meanTempC = Number((baselineMeanC + heatDelta + 2.2).toFixed(1));
+      // Roof surfaces at height receive higher unobstructed solar exposure (+2.0°C to +4.5°C)
+      const heightSolarFactor = Math.min(2.0, (buildingHeightMeters / 30) * 0.8);
+      const meanTempC = Number((baselineMeanC + heatDelta + 2.0 + heightSolarFactor).toFixed(1));
       const maxTempC = Number((meanTempC + 4.8).toFixed(1));
       const minTempC = Number((meanTempC - 1.2).toFixed(1));
 
@@ -389,10 +400,10 @@ export class FormaSceneService {
       else if (maxTempC < 28 && localWetBulbC < 24) riskCategory = "Low";
 
       const recommendations: string[] = [
-        `Building Roof Area: ~${areaSqMeters.toLocaleString()} m² with high solar exposure.`,
-        "Apply High-SRI cool roof coating (Solar Reflectance Index > 82) to reflect incident solar radiation.",
-        "Consider intensive or extensive green roof installation to reduce building HVAC cooling loads by up to 20%.",
-        "Integrate rooftop photovoltaic (PV) solar pergolas for combined shade and clean energy generation.",
+        `3D Building Profile: ${buildingHeightMeters}m Height (~${floorCount} Floors), Roof Area: ~${areaSqMeters.toLocaleString()} m².`,
+        "Apply High-SRI cool roof membrane (Solar Reflectance Index > 82) to reflect incident solar heat.",
+        `Install intensive/extensive green roof to reduce top-floor HVAC cooling demand across ${floorCount} floors by up to 22%.`,
+        "Incorporate rooftop photovoltaic (PV) solar pergolas for dual shade & clean energy generation.",
       ];
 
       return {
@@ -400,6 +411,8 @@ export class FormaSceneService {
         timestamp: Date.now(),
         polygonCoordinates: coords,
         areaSqMeters: Math.max(50, areaSqMeters),
+        buildingHeightMeters,
+        floorCount,
         meanTemperatureC: meanTempC,
         maxTemperatureC: maxTempC,
         minTemperatureC: minTempC,
