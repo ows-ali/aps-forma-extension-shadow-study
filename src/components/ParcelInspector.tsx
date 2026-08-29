@@ -64,6 +64,8 @@ export default function ParcelInspector({
         setInspection(result);
         setInspectSource("draw");
       }
+    } catch (err) {
+      console.warn("Drawing inspection cancelled:", err);
     } finally {
       setIsDrawing(false);
     }

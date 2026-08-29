@@ -127,6 +127,7 @@ export default function App() {
   const isRawF = thermalData?.heatmap.stats_data.units !== "celsius";
   const baselineMeanC = isRawF ? fahrenheitToCelsius(rawMean) : rawMean;
 
+  // Derived labels
   const minLabel =
     unit === "C"
       ? `${(baselineMeanC - 4.5).toFixed(1)}°C`
