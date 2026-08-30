@@ -1,4 +1,4 @@
-# ⚡ FortyForma™ 3D
+# ⚡ FortyForma 3D
 ### Microclimate Heat Intelligence & Thermal Digital Twin for Autodesk Forma
 
 [![FortyGuard Hackathon](https://img.shields.io/badge/FortyGuard_Global_AI_Hackathon-Track_1:_Resilient_Cities-0284c7?style=for-the-badge)](https://fortyguard.com)
@@ -16,7 +16,7 @@
 
 **80% of urban heat vulnerability is locked into buildings during the early massing and master-planning phase.** Historically, architects and urban planners have designed structures in 3D BIM tools (like Autodesk Forma) without real-time microclimate intelligence, resulting in severe urban heat island (UHI) effects, dangerous pedestrian heat stress, and massive HVAC cooling loads.
 
-**FortyForma™ 3D** bridges **FortyGuard's satellite and IoT thermal canopy models (TCM)** directly into **Autodesk Forma's 3D design canvas**. In real-time, architects can:
+**FortyForma 3D** bridges **FortyGuard's satellite and IoT thermal canopy models (TCM)** directly into **Autodesk Forma's 3D design canvas**. In real-time, architects can:
 1. **Visualize 3D Surface Heatmaps**: Project high-resolution FortyGuard thermal ground and roof textures across 100% of the terrain with scientific color palettes (*Turbo*, *Plasma*, *Temperature*).
 2. **1-Click 3D Building & Roof Heat Inspection**: Select any building mass in the 3D scene to calculate its true height ($Z$), floor count, projected roof skin temperature, and localized 2m wet-bulb safety limits.
 3. **Simulate Passive Heat Mitigation**: Interactively toggle high-albedo cool roofs (SRI > 82), 30%+ tree canopy greening, and permeable pavers to verify a **$-7.0^\circ\text{C}$ surface heat drop and up to $\sim 20\%$ HVAC energy savings**.
@@ -24,7 +24,7 @@
 
 ---
 
-## 🚀 How to Add FortyForma™ to Autodesk Forma (Step-by-Step)
+## 🚀 How to Add FortyForma to Autodesk Forma (Step-by-Step)
 
 You can load FortyForma into your active Autodesk Forma design workspace in under 30 seconds:
 
@@ -48,7 +48,7 @@ You can load FortyForma into your active Autodesk Forma design workspace in unde
 
 ## 🗂️ Core Architecture & Feature Breakdown
 
-FortyForma™ 3D is structured into 3 purpose-built microclimate intelligence modules:
+FortyForma 3D is structured into 3 purpose-built microclimate intelligence modules:
 
 ### Tab 1: 🌐 Thermal Twin (Diagnosis & 3D Spatial Analytics)
 * **Full-Coverage Ground Texture Projection**: Uses bilinear offscreen canvas interpolation to map FortyGuard TCM polygons across 100% of Forma's terrain bounding box.
@@ -77,7 +77,7 @@ FortyForma™ 3D is structured into 3 purpose-built microclimate intelligence mo
 
 ## ⚡ FortyGuard API Integration Points
 
-FortyForma™ communicates with the FortyGuard Large Temperature Model (LTM) API suite:
+FortyForma communicates with the FortyGuard Large Temperature Model (LTM) API suite:
 
 | Endpoint | Parameter Payload | Output Used in FortyForma |
 | :--- | :--- | :--- |
@@ -121,4 +121,4 @@ npm run build
 * **Hackathon**: FortyGuard Global AI Hackathon 2026
 * **Primary Track**: Track 1 — Resilient Cities & Infrastructure
 * **Submission Date**: August 2026
-* **Team**: Team Berlin (FortyForma™ 3D)
+* **Team**: Team Berlin (FortyForma 3D)

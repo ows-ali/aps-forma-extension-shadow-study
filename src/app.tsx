@@ -156,7 +156,7 @@ export default function App() {
               {theme === "light" ? "🌙 Dark" : "☀️ Light"}
             </button>
           </div>
-          <h1 class="app-title">FortyForma™ 3D</h1>
+          <h1 class="app-title">FortyForma 3D</h1>
           <div class="app-tagline">Microclimate Heat Intelligence & Thermal Digital Twin</div>
         </div>
 
