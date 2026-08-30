@@ -156,6 +156,23 @@ export class FortyGuardService {
   }
 
   /**
+   * Dynamically calculate the most recent summer design date
+   * - During summer months (June-Sept), uses current date
+   * - Outside summer, dynamically selects August 01 of the most recent summer
+   */
+  static getMostRecentSummerDate(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1; // 1 to 12
+
+    if (month >= 6 && month <= 9) {
+      return now.toISOString().split("T")[0];
+    }
+    const targetYear = month < 6 ? year - 1 : year;
+    return `${targetYear}-08-01`;
+  }
+
+  /**
    * Fetch site thermal intelligence (Heatmap + Env Params)
    */
   static async fetchThermalData(options: {
@@ -172,7 +189,7 @@ export class FortyGuardService {
       lat,
       lng,
       bbox,
-      date = new Date().toISOString().split("T")[0],
+      date = this.getMostRecentSummerDate(),
       forceRefresh = false,
       overrideMode,
     } = options;
