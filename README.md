@@ -8,6 +8,7 @@
 
 > **Live Vercel Extension URL**: [https://aps-forma-extension-shadow-study.vercel.app](https://aps-forma-extension-shadow-study.vercel.app)  
 > **Video Walkthrough**: [https://youtu.be/AXHmg-9oo78](https://youtu.be/AXHmg-9oo78)  
+> **GitHub Repository**: [https://github.com/ows-ali/aps-forma-extension-shadow-study](https://github.com/ows-ali/aps-forma-extension-shadow-study)  
 > **Local Dev Port**: `http://localhost:8081`  
 > **Primary Track**: **Track 1 — Resilient Cities & Infrastructure (Digital Twin)**  
 > **Cross-Track Synergies**: **Track 2 (Future Buildings & Energy Payback)** • **Track 6 (Agentic AI Copilot)**  
@@ -37,7 +38,7 @@ Watch the complete video demonstration of **FortyForma 3D** running live inside 
 1. **Visualize 3D Surface Heatmaps**: Project high-resolution FortyGuard thermal ground and roof textures across 100% of the terrain with scientific color palettes (*Turbo*, *Plasma*, *Temperature*).
 2. **1-Click 3D Building & Roof Heat Inspection**: Select any building mass in the 3D scene to calculate its true height ($Z$), floor count, projected roof skin temperature, and localized 2m wet-bulb safety limits.
 3. **Simulate Passive Heat Mitigation**: Interactively toggle high-albedo cool roofs (SRI > 82), vegetative tree canopy buffers, and permeable paving to de-risk urban heat, simulate multi-degree surface temperature reductions, and lower building cooling energy demand.
-4. **Consult an AI Climate Copilot**: Query live AI reasoning (powered by **Groq / Llama 3.1 & 3.3**, **Google Gemini**, or **OpenAI**) enriched with live FortyGuard spatial microclimate telemetry.
+4. **Consult an AI Climate Copilot**: Query live AI reasoning (powered by **Groq**, **Google Gemini**, or **OpenAI**) enriched with live FortyGuard spatial microclimate telemetry.
 
 ---
 
@@ -48,29 +49,26 @@ Watch the complete video demonstration of **FortyForma 3D** running live inside 
 | **Tab 1: 🌐 Thermal Twin**<br>Full 3D terrain ground texture projection, Heat Index, and 2m OSHA Wet-Bulb Safety | ![Thermal Twin Ground Heatmap](assets/screenshots/Screenshot1.png) |
 | **Tab 1: 🏢 3D Building Inspector**<br>1-click building height ($Z$) & floor count detection with tailored roof mitigation | ![3D Building & Parcel Inspector](assets/screenshots/Screenshot%202.png) |
 | **Tab 2: 🌱 Cooling Simulator**<br>Interactive passive mitigation modeling, cool roofs, tree canopy greening, and energy savings | ![Passive Cooling Simulator](assets/screenshots/Screenshot%203.png) |
-| **Tab 3: 🤖 Climate Copilot**<br>Live AI reasoning with dynamic Groq / Gemini models and FortyGuard context | ![AI Climate Copilot](assets/screenshots/Screenshot%204.png) |
+| **Tab 3: 🤖 Climate Copilot**<br>Live AI reasoning with dynamic LLM providers and FortyGuard microclimate context | ![AI Climate Copilot](assets/screenshots/Screenshot%204.png) |
 
 ---
 
 ## 🚀 How to Add FortyForma to Autodesk Forma (Step-by-Step)
 
-You can load FortyForma into your active Autodesk Forma design workspace in under 30 seconds:
+You can connect and run FortyForma in your Autodesk Forma project in under 30 seconds:
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        Autodesk Forma Web Canvas                       │
-│                                                                        │
-│  1. Open your project at https://app.autodeskforma.eu                  │
-│  2. Click the "Extensions" icon in the left/top navigation menu        │
-│  3. Click "+ Add Extension by URL"                                     │
-│  4. Paste Extension URL:                                               │
-│     https://aps-forma-extension-shadow-study.vercel.app                │
-│     (or http://localhost:8081 for local development)                  │
-│  5. Click "Save & Open"                                                │
-│                                                                        │
-│  ⚡ FortyForma 3D will appear in your Right-Hand Side Analysis Panel!  │
-└────────────────────────────────────────────────────────────────────────┘
-```
+1. **Open Autodesk Forma**: Open your 3D design project at [app.autodeskforma.eu](https://app.autodeskforma.eu).
+2. **Open Extensions**: In the toolbar, open the **Extensions** menu and click **Create Extension** (or *Add Extension*).
+3. **Configure Extension Info**:
+   - **Name**: `FortyForma 3D` (or any title)
+   - **Allowed Users**: Select **All users in Forma**
+4. **Configure Extension URL**:
+   - Scroll to the bottom of the extension editor, uncomment the code block, and update the URL:
+     ```yaml
+     url: https://aps-forma-extension-shadow-study.vercel.app
+     ```
+     *(or `http://localhost:8081` for local development)*
+5. **Save**: Click **Save** — Extension will show up and you can add it in your project. It will show as popup!
 
 ---
 
@@ -96,10 +94,10 @@ FortyForma 3D is structured into 3 purpose-built microclimate intelligence modul
   - 💨 **Ground Cross-Ventilation Breezeways**: Enhances natural air circulation aligned with prevailing summer wind corridors.
 
 ### Tab 3: 🤖 Climate Copilot (AI-Driven AEC Advisory)
-* **Multi-Provider Live LLM Support**: Connects directly to **Groq** (`llama-3.1-8b-instant`, `llama-3.3-70b-versatile`), **Google Gemini** (`gemini-1.5-flash`), or **OpenAI** (`gpt-4o-mini`).
-* **Dynamic Model Discovery**: Queries Groq `/v1/models` in real time to lock onto active accounts without configuration errors.
+* **Multi-Provider Live LLM Support**: Connects directly to **Groq**, **Google Gemini**, or **OpenAI**.
+* **Dynamic Model Discovery**: Automatically queries active chat models in real time to lock onto available accounts without configuration errors.
 * **Telemetry-Enriched System Prompt**: Feeds active FortyGuard site baseline, coolest/hottest spatial sectors, solar irradiance ($W/m^2$), 2m wet-bulb ($^\circ\text{C}$), and inspected building dimensions into the LLM context.
-* **1-Click Built-in Fallback**: Fast rule-based response engine with 0 latency and instant 1-click fallback buttons if API keys are not configured.
+* **Built-in Fallback**:  If API keys are not configured it fallbacks to fast rule-based response engine with 0 latency.
 
 ---
 
@@ -125,8 +123,8 @@ FortyForma communicates with the FortyGuard Large Temperature Model (LTM) API su
 
 ### Running Locally:
 ```bash
-# 1. Clone repo & navigate to extension
-git clone <repo-url>
+# 1. Clone repository & navigate to extension
+git clone https://github.com/ows-ali/aps-forma-extension-shadow-study
 cd aps-forma-extension-shadow-study
 
 # 2. Install dependencies
@@ -142,12 +140,3 @@ npm run dev
 ```bash
 npm run build
 ```
-
----
-
-## 👥 Hackathon Team & Acknowledgements
-
-* **Hackathon**: FortyGuard Global AI Hackathon 2026
-* **Primary Track**: Track 1 — Resilient Cities & Infrastructure
-* **Submission Date**: August 2026
-* **Team**: Team Berlin (FortyForma 3D)
