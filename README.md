@@ -4,11 +4,28 @@
 [![FortyGuard Hackathon](https://img.shields.io/badge/FortyGuard_Global_AI_Hackathon-Track_1:_Resilient_Cities-0284c7?style=for-the-badge)](https://fortyguard.com)
 [![Autodesk Forma SDK](https://img.shields.io/badge/Autodesk_Forma-Embedded_3D_Extension-059669?style=for-the-badge)](https://aps.autodesk.com/en/docs/forma/v1/embedded-views/introduction/)
 [![Live on Vercel](https://img.shields.io/badge/Live_Deployment-Vercel-black?style=for-the-badge&logo=vercel)](https://aps-forma-extension-shadow-study.vercel.app)
+[![YouTube Video Demo](https://img.shields.io/badge/Watch_Demo_Video-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/AXHmg-9oo78)
 
 > **Live Vercel Extension URL**: [https://aps-forma-extension-shadow-study.vercel.app](https://aps-forma-extension-shadow-study.vercel.app)  
+> **Video Walkthrough**: [https://youtu.be/AXHmg-9oo78](https://youtu.be/AXHmg-9oo78)  
 > **Local Dev Port**: `http://localhost:8081`  
 > **Primary Track**: **Track 1 — Resilient Cities & Infrastructure (Digital Twin)**  
-> **Cross-Track Synergies**: **Track 2 (Future Buildings & Energy Payback)** • **Track 6 (Agentic AI Copilot)**
+> **Cross-Track Synergies**: **Track 2 (Future Buildings & Energy Payback)** • **Track 6 (Agentic AI Copilot)**  
+> **Foundation**: Built upon the official **Autodesk Forma Embedded View Extension Starter** (`aps-forma-extension-shadow-study`) and upgraded into a complete microclimate intelligence suite with FortyGuard.
+
+---
+
+![FortyForma 3D Hero Banner](assets/screenshots/main.png)
+
+---
+
+## 🎥 Video Walkthrough
+
+Watch the complete video demonstration of **FortyForma 3D** running live inside Autodesk Forma:
+
+[![FortyForma 3D Video Walkthrough](https://img.youtube.com/vi/AXHmg-9oo78/maxresdefault.jpg)](https://youtu.be/AXHmg-9oo78)
+
+🔗 **Direct Video Link**: [https://youtu.be/AXHmg-9oo78](https://youtu.be/AXHmg-9oo78)
 
 ---
 
@@ -19,8 +36,19 @@
 **FortyForma 3D** bridges **FortyGuard's satellite and IoT thermal canopy models (TCM)** directly into **Autodesk Forma's 3D design canvas**. In real-time, architects can:
 1. **Visualize 3D Surface Heatmaps**: Project high-resolution FortyGuard thermal ground and roof textures across 100% of the terrain with scientific color palettes (*Turbo*, *Plasma*, *Temperature*).
 2. **1-Click 3D Building & Roof Heat Inspection**: Select any building mass in the 3D scene to calculate its true height ($Z$), floor count, projected roof skin temperature, and localized 2m wet-bulb safety limits.
-3. **Simulate Passive Heat Mitigation**: Interactively toggle high-albedo cool roofs (SRI > 82), 30%+ tree canopy greening, and permeable pavers to verify a **$-7.0^\circ\text{C}$ surface heat drop and up to $\sim 20\%$ HVAC energy savings**.
+3. **Simulate Passive Heat Mitigation**: Interactively toggle high-albedo cool roofs (SRI > 82), vegetative tree canopy buffers, and permeable paving to de-risk urban heat, simulate multi-degree surface temperature reductions, and lower building cooling energy demand.
 4. **Consult an AI Climate Copilot**: Query live AI reasoning (powered by **Groq / Llama 3.1 & 3.3**, **Google Gemini**, or **OpenAI**) enriched with live FortyGuard spatial microclimate telemetry.
+
+---
+
+## 📸 Extension Visual Tour & Screenshots
+
+| Module | Feature Preview |
+| :--- | :--- |
+| **Tab 1: 🌐 Thermal Twin**<br>Full 3D terrain ground texture projection, Heat Index, and 2m OSHA Wet-Bulb Safety | ![Thermal Twin Ground Heatmap](assets/screenshots/Screenshot1.png) |
+| **Tab 1: 🏢 3D Building Inspector**<br>1-click building height ($Z$) & floor count detection with tailored roof mitigation | ![3D Building & Parcel Inspector](assets/screenshots/Screenshot%202.png) |
+| **Tab 2: 🌱 Cooling Simulator**<br>Interactive passive mitigation modeling, cool roofs, tree canopy greening, and energy savings | ![Passive Cooling Simulator](assets/screenshots/Screenshot%203.png) |
+| **Tab 3: 🤖 Climate Copilot**<br>Live AI reasoning with dynamic Groq / Gemini models and FortyGuard context | ![AI Climate Copilot](assets/screenshots/Screenshot%204.png) |
 
 ---
 
@@ -32,7 +60,7 @@ You can load FortyForma into your active Autodesk Forma design workspace in unde
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        Autodesk Forma Web Canvas                       │
 │                                                                        │
-│  1. Open project at https://app.autodeskforma.eu                       │
+│  1. Open your project at https://app.autodeskforma.eu                  │
 │  2. Click the "Extensions" icon in the left/top navigation menu        │
 │  3. Click "+ Add Extension by URL"                                     │
 │  4. Paste Extension URL:                                               │
@@ -60,12 +88,12 @@ FortyForma 3D is structured into 3 purpose-built microclimate intelligence modul
 
 ### Tab 2: 🌱 Cooling Simulator (Passive Mitigation & ROI)
 * **Side-by-Side Impact Comparison**: Compares unmitigated site baseline against active mitigation scenarios.
-* **Executive Impact KPI Banner**: Highlights **$-7.0^\circ\text{C}$ ($-22\%$)** peak surface temperature reduction and **$\sim 20\%$ HVAC cooling load savings**.
+* **Executive Impact KPI Banner**: Highlights modeled peak surface temperature reductions and HVAC cooling load savings.
 * **Interactive Strategy Cards**:
-  - 🏠 **High-Albedo Cool Roofs (SRI > 82)** ($-4.5^\circ\text{C}$ roof drop)
-  - 🌳 **30%+ Deciduous Tree Canopy** ($-3.5^\circ\text{C}$ pedestrian ground drop)
-  - 🧱 **Permeable Ground Pavers** ($-1.8^\circ\text{C}$ evaporative cooling)
-  - 💨 **Ground Cross-Ventilation Breezeways** ($-1.2^\circ\text{C}$ convective cooling)
+  - 🏠 **High-Albedo Cool Roofs (SRI > 82)**: Lowers upper-floor roof skin heat and solar absorption.
+  - 🌳 **Deciduous Tree Canopy Buffering**: Provides solar shading and evapotranspirative cooling along pedestrian walkways.
+  - 🧱 **Permeable Ground Pavers**: Replaces impervious asphalt to improve moisture retention and evaporative cooling.
+  - 💨 **Ground Cross-Ventilation Breezeways**: Enhances natural air circulation aligned with prevailing summer wind corridors.
 
 ### Tab 3: 🤖 Climate Copilot (AI-Driven AEC Advisory)
 * **Multi-Provider Live LLM Support**: Connects directly to **Groq** (`llama-3.1-8b-instant`, `llama-3.3-70b-versatile`), **Google Gemini** (`gemini-1.5-flash`), or **OpenAI** (`gpt-4o-mini`).
@@ -89,6 +117,7 @@ FortyForma communicates with the FortyGuard Large Temperature Model (LTM) API su
 
 ## 💻 Tech Stack & Developer Setup
 
+* **Foundation**: Official Autodesk Forma Embedded View Extension Starter (`aps-forma-extension-shadow-study`)
 * **Framework**: Preact 10 + TypeScript 5 (ultra-lightweight bundle <160 kB gzipped)
 * **Bundler & Proxy**: Vite 5 with CORS-free `/api/fortyguard`, `/api/groq`, `/api/openai`, `/api/gemini` proxy handlers
 * **3D Integration**: Autodesk Forma Embedded View SDK (`forma-embedded-view-sdk` v0.87+)
